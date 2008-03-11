@@ -7,6 +7,7 @@
 	*/
 	public class Command 
 	{
+		public static const EXTENDED_HELLO:String = "EHLO";
 		public static const HELLO:String = "HELO";
 		public static const MAIL:String = "MAIL";
 		public static const RECIPIENT:String = "RCPT";
