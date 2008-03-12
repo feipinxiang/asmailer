@@ -40,6 +40,11 @@
 			queue.clear();
 		}
 		
+		public function isEmpty():Boolean
+		{
+			return queue.isEmpty();
+		}
+		
 		public function get size():int
 		{
 			return queue.size;
