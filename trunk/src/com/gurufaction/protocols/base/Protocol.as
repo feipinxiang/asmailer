@@ -38,15 +38,27 @@
 			return new Handler();
 		}
 		
-		protected function processPacket():void
+		protected function processPacket(all:Boolean = false):void
 		{
 			if ( queue != null )
 			{
 				if ( queue.size > 0 )
 				{
-					Logger.debug(queue.peek());
-					this.writeBytes(queue.dequeue());
-					this.flush();
+					if ( all )
+					{
+						while( !queue.isEmpty() )
+						{
+							Logger.info(queue.peek());
+							this.writeBytes(queue.dequeue());
+							this.flush();
+						}
+					}
+					else
+					{
+						Logger.debug(queue.peek());
+						this.writeBytes(queue.dequeue());
+						this.flush();
+					}
 				}
 			}
 		}
