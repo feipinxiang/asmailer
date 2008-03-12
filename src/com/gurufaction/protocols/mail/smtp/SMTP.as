@@ -6,7 +6,9 @@
 	import com.gurufaction.protocols.base.Protocol;
 	import com.gurufaction.protocols.mail.smtp.events.SMTPEvent;
 	import com.gurufaction.protocols.mail.smtp.handlers.ErrorHandler;
+	import com.gurufaction.protocols.mail.smtp.handlers.OKHandler;
 	import com.gurufaction.protocols.mail.smtp.handlers.ServiceReadyHandler;
+	import flash.utils.ByteArray;
 	
 	/**
 	* ...
@@ -27,17 +29,19 @@
 		
 		public function send( from:String, to:String, subject:String, message:String ):void
 		{
-			this.queue.enqueue( new CommandPacket( Command.HELLO, this.host) );
-			this.queue.enqueue( new CommandPacket( Command.MAIL, "FROM: <" + from + ">") );
+			this.queue.enqueue( new CommandPacket( Command.EXTENDED_HELLO, this.host) );
+			this.queue.enqueue( new CommandPacket( Command.MAIL, "FROM:<" + from + ">") );
 			this.queue.enqueue( new CommandPacket( Command.RECIPIENT, "TO:<" + to + ">") );
 			this.queue.enqueue( new CommandPacket( Command.DATA ) );
-			this.queue.enqueue( new CommandPacket( "", "From :" + from) );
-			this.queue.enqueue( new CommandPacket( "", "To :" + to) );
-			this.queue.enqueue( new CommandPacket( "", "Subject :" + subject) );
-			this.queue.enqueue( new CommandPacket( "", "Mime-Version: 1.0") );
-			this.queue.enqueue( new CommandPacket( "", "Content-Type: text/html; charset=UTF-8; format=flowed") );
-			this.queue.enqueue( new CommandPacket( "", message ) );
-			this.queue.enqueue( new CommandPacket( "", "." ) );
+			var msg:ByteArray = new ByteArray();
+			msg.writeUTFBytes( "From :" + from + CommandPacket.CRLF )
+			msg.writeUTFBytes( "To :" + to + CommandPacket.CRLF);
+			msg.writeUTFBytes( "Subject :" + subject + CommandPacket.CRLF);
+			msg.writeUTFBytes( "Mime-Version: 1.0" + CommandPacket.CRLF);
+			msg.writeUTFBytes( "Content-Type: text/html; charset=UTF-8; format=flowed" + CommandPacket.CRLF);
+			msg.writeUTFBytes( message  + CommandPacket.CRLF);
+			msg.writeUTFBytes( "." + CommandPacket.CRLF);
+			this.queue.enqueue( msg );
 			this.processPacket();
 			
 		}
@@ -50,12 +54,16 @@
 		
 		override protected function initializeHandlers():Handler 
 		{
-			var ready:Handler = new ServiceReadyHandler()
-			var error:Handler = new ErrorHandler();
-			ready.successor = error;
-			ready.addEventListener( SMTPEvent.READY, eventHandler );
-			error.addEventListener( SMTPEvent.MAIL_ERROR, eventHandler );
-			return ready;
+			var readyHandler:Handler = new ServiceReadyHandler();
+			var okHandler:Handler = new OKHandler();
+			var errorHandler:Handler = new ErrorHandler();
+			
+			readyHandler.successor = okHandler;
+			okHandler.successor = errorHandler;
+			readyHandler.addEventListener( SMTPEvent.READY, eventHandler );
+			errorHandler.addEventListener( SMTPEvent.MAIL_ERROR, eventHandler );
+			okHandler.addEventListener( SMTPEvent.MAIL_SENT, eventHandler );
+			return readyHandler;
 		}
 		
 		public function eventHandler( event:SMTPEvent ):void
