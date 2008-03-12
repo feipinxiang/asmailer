@@ -10,7 +10,7 @@
 	{
 		public static const CRLF:String = "\r\n";
 		
-		public function CommandPacket(cmd:String, arg:String ="" ) 
+		public function CommandPacket(cmd:String, arg:String = "" ) 
 		{
 			this.writeUTFBytes (cmd + " " + arg + CommandPacket.CRLF);
 		}
