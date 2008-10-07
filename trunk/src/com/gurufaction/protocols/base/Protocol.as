@@ -14,7 +14,7 @@
 	*/
 	public class Protocol extends Socket
 	{
-		protected var queue:PacketQueue = new PacketQueue();
+		public var queue:PacketQueue = new PacketQueue();
 		protected var defaultHandler:Handler;
 		
 		public function Protocol(host:String = null , port:int = 0) 
@@ -30,9 +30,7 @@
 			var data:ByteArray = new ByteArray();
 			event.target.readBytes(data);
 			Logger.debug("<<" + data);
-			defaultHandler.handleRequest(queue, data)
-			
-			this.processPacket();
+			defaultHandler.handleRequest(this, data)
 		}
 		
 		private function socketErrorHandler( event:IOErrorEvent ):void {
@@ -44,7 +42,7 @@
 			return new Handler();
 		}
 		
-		protected function processPacket(all:Boolean = false):void
+		public function processPacket(all:Boolean = false):void
 		{
 			if ( queue != null )
 			{
@@ -54,7 +52,7 @@
 					{
 						while( !queue.isEmpty() )
 						{
-							Logger.info(">>" + queue.peek());
+							Logger.debug(">>" + queue.peek());
 							this.writeBytes(queue.dequeue());
 						}
 						this.flush();

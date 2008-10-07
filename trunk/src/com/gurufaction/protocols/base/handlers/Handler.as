@@ -1,6 +1,6 @@
 ﻿package com.gurufaction.protocols.base.handlers 
 {
-	import com.gurufaction.protocols.base.packets.PacketQueue;
+	import com.gurufaction.protocols.base.Protocol;
 	import com.docsultant.logging.Logger;
 	import flash.events.EventDispatcher;
 	import flash.utils.ByteArray;
@@ -28,12 +28,12 @@
 			_successor = value;
 		}
 		
-		public function handleRequest(queue:PacketQueue, data:ByteArray):void
+		public function handleRequest(protocol:Protocol, data:ByteArray):void
 		{
 			Logger.debug(data);
 			if ( this.successor != null )
 			{
-				this.successor.handleRequest(queue, data);
+				this.successor.handleRequest(protocol, data);
 			}
 		}
 		
