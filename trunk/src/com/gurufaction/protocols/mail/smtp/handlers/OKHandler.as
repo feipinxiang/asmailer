@@ -23,6 +23,7 @@
 		{
 			data.position = 0;
 			var response:String = data.readUTFBytes( data.bytesAvailable );
+			var requiresAuth:Boolean = false;
 			
 			for each( var line:String in response.split("\r\n") )
 			{
@@ -34,6 +35,18 @@
 					if ( replyCode.message.indexOf("queued") > 0 )
 					{
 						this.dispatchEvent( new SMTPEvent( SMTPEvent.MAIL_SENT, replyCode) );
+					}
+					
+					if ( replyCode.message.indexOf("AUTH") > 0 ) {
+						requiresAuth = true;
+						protocol.queue.enqueue( new CommandPacket( Command.AUTHENTICATION, "LOGIN" ) );
+					}
+					
+					if ( replyCode.message.indexOf("OK") > 0 ) {
+						protocol.processPacket();
+						if ( requiresAuth == false ) {
+							this.dispatchEvent( new SMTPEvent( SMTPEvent.READY, replyCode) );
+						}
 					}
 				}
 				else if ( this.successor != null )
