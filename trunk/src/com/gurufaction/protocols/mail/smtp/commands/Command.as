@@ -9,6 +9,7 @@
 	{
 		public static const EXTENDED_HELLO:String = "EHLO";
 		public static const HELLO:String = "HELO";
+		public static const AUTHENTICATION:String = "AUTH";
 		public static const MAIL:String = "MAIL";
 		public static const RECIPIENT:String = "RCPT";
 		public static const SEND:String = "SEND";
@@ -22,6 +23,7 @@
 		public static const NOOP:String = "NOOP";
 		public static const QUIT:String = "QUIT";
 		public static const TURN:String = "TURN";
+		public static const END_DATA:String = "\r\n.\r\n";
 		
 		public function Command() 
 		{

@@ -8,6 +8,7 @@
 	import com.gurufaction.protocols.mail.smtp.handlers.ErrorHandler;
 	import com.gurufaction.protocols.mail.smtp.handlers.OKHandler;
 	import com.gurufaction.protocols.mail.smtp.handlers.ServiceReadyHandler;
+	import com.dynamicflash.util.Base64;
 	import flash.utils.ByteArray;
 	
 	/**
@@ -30,6 +31,9 @@
 		public function send( from:String, to:String, subject:String, message:String ):void
 		{
 			this.queue.enqueue( new CommandPacket( Command.EXTENDED_HELLO, this.host) );
+			this.queue.enqueue( new CommandPacket( Command.AUTHENTICATION, "LOGIN" ) );
+			this.queue.enqueue( new CommandPacket( Base64.encode("michael_ramirez44") ) );
+			//this.queue.enqueue( new CommandPacket( Base64.encode("mr5871") ) );
 			this.queue.enqueue( new CommandPacket( Command.MAIL, "FROM:<" + from + ">") );
 			this.queue.enqueue( new CommandPacket( Command.RECIPIENT, "TO:<" + to + ">") );
 			this.queue.enqueue( new CommandPacket( Command.DATA ) );
@@ -39,9 +43,10 @@
 			msg.writeUTFBytes( "Subject :" + subject + CommandPacket.CRLF);
 			msg.writeUTFBytes( "Mime-Version: 1.0" + CommandPacket.CRLF);
 			msg.writeUTFBytes( "Content-Type: text/html; charset=UTF-8; format=flowed" + CommandPacket.CRLF);
-			msg.writeUTFBytes( message  + CommandPacket.CRLF);
-			msg.writeUTFBytes( "." + CommandPacket.CRLF);
+			msg.writeUTFBytes( message);
 			this.queue.enqueue( msg );
+			this.queue.enqueue( new CommandPacket( Command.END_DATA ) );
+			this.queue.enqueue( new CommandPacket( Command.QUIT ) );
 			this.processPacket();
 			
 		}
