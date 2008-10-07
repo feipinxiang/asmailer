@@ -1,10 +1,10 @@
 ﻿package com.gurufaction.protocols.mail.smtp.handlers 
 {
+	import com.gurufaction.protocols.base.Protocol;
 	import com.gurufaction.protocols.mail.smtp.events.SMTPEvent;
 	import flash.utils.ByteArray;
 	import com.gurufaction.protocols.mail.smtp.replies.ReplyCode;
 	import com.gurufaction.protocols.base.handlers.Handler;
-	import com.gurufaction.protocols.base.packets.PacketQueue;
 	import com.docsultant.logging.Logger;
 	
 	/**
@@ -19,7 +19,7 @@
 			
 		}
 		
-		override public function handleRequest(queue:PacketQueue, data:ByteArray):void 
+		override public function handleRequest(protocol:Protocol, data:ByteArray):void 
 		{
 			data.position = 0;
 			var response:String = data.readUTFBytes( data.bytesAvailable );
@@ -40,7 +40,7 @@
 				{
 					var unhandledData:ByteArray = new ByteArray();
 					unhandledData.writeUTFBytes(line);
-					this.successor.handleRequest(queue, unhandledData);
+					this.successor.handleRequest(protocol, unhandledData);
 				}
 			}
 		}

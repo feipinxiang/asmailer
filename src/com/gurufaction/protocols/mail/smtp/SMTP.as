@@ -5,6 +5,7 @@
 	import com.gurufaction.protocols.mail.smtp.commands.Command;
 	import com.gurufaction.protocols.base.Protocol;
 	import com.gurufaction.protocols.mail.smtp.events.SMTPEvent;
+	import com.gurufaction.protocols.mail.smtp.handlers.AuthHandler;
 	import com.gurufaction.protocols.mail.smtp.handlers.ErrorHandler;
 	import com.gurufaction.protocols.mail.smtp.handlers.OKHandler;
 	import com.gurufaction.protocols.mail.smtp.handlers.ServiceReadyHandler;
@@ -19,21 +20,26 @@
 	{
 		public var host:String = null;
 		public var port:int = 25;
+		public var username:String = null;
+		public var password:String = null;
+		private var readyHandler:ServiceReadyHandler = new ServiceReadyHandler();
+		private var okHandler:OKHandler = new OKHandler();
+		private var errorHandler:ErrorHandler = new ErrorHandler();
+		private var authHandler:AuthHandler = new AuthHandler();
 		
-		public function SMTP(host:String = null, port:int = 25) 
+		public function SMTP(host:String = null, username:String = null, password:String = null, port:int = 25) 
 		{
 			super(null, 0)
 			this.host = host;
 			this.port = port;
+			this.username = username;
+			this.password = password;
+			readyHandler.host = host;
 			this.connect(host, port);
 		}
 		
 		public function send( from:String, to:String, subject:String, message:String ):void
 		{
-			this.queue.enqueue( new CommandPacket( Command.EXTENDED_HELLO, this.host) );
-			this.queue.enqueue( new CommandPacket( Command.AUTHENTICATION, "LOGIN" ) );
-			this.queue.enqueue( new CommandPacket( Base64.encode("michael_ramirez44") ) );
-			//this.queue.enqueue( new CommandPacket( Base64.encode("mr5871") ) );
 			this.queue.enqueue( new CommandPacket( Command.MAIL, "FROM:<" + from + ">") );
 			this.queue.enqueue( new CommandPacket( Command.RECIPIENT, "TO:<" + to + ">") );
 			this.queue.enqueue( new CommandPacket( Command.DATA ) );
@@ -47,7 +53,7 @@
 			this.queue.enqueue( msg );
 			this.queue.enqueue( new CommandPacket( Command.END_DATA ) );
 			this.queue.enqueue( new CommandPacket( Command.QUIT ) );
-			this.processPacket();
+			this.processPacket(true);
 			
 		}
 		
@@ -57,23 +63,29 @@
 			this.processPacket();
 		}
 		
+		private function authenticate( username:String, password:String ):void {
+			authHandler.username = username;
+			authHandler.password = password;
+			this.queue.enqueue( new CommandPacket( Command.AUTHENTICATION, "LOGIN" ) );
+			this.processPacket(true);
+		}
+		
 		override protected function initializeHandlers():Handler 
 		{
-			var readyHandler:Handler = new ServiceReadyHandler();
-			var okHandler:Handler = new OKHandler();
-			var errorHandler:Handler = new ErrorHandler();
-			
 			readyHandler.successor = okHandler;
 			okHandler.successor = errorHandler;
+			errorHandler.successor = authHandler;
+			
 			readyHandler.addEventListener( SMTPEvent.READY, eventHandler );
 			errorHandler.addEventListener( SMTPEvent.MAIL_ERROR, eventHandler );
 			okHandler.addEventListener( SMTPEvent.MAIL_SENT, eventHandler );
+			
 			return readyHandler;
 		}
 		
 		public function eventHandler( event:SMTPEvent ):void
 		{
-			dispatchEvent( new SMTPEvent(event.type,event.replyCode) );
+			dispatchEvent( new SMTPEvent(event.type, event.replyCode) );
 		}
 		
 	}
