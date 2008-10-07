@@ -35,6 +35,8 @@
 			this.username = username;
 			this.password = password;
 			readyHandler.host = host;
+			authHandler.username = username;
+			authHandler.password = password;
 			this.connect(host, port);
 		}
 		
@@ -61,13 +63,6 @@
 		{
 			this.queue.enqueue( new CommandPacket( Command.HELP, cmd) );
 			this.processPacket();
-		}
-		
-		private function authenticate( username:String, password:String ):void {
-			authHandler.username = username;
-			authHandler.password = password;
-			this.queue.enqueue( new CommandPacket( Command.AUTHENTICATION, "LOGIN" ) );
-			this.processPacket(true);
 		}
 		
 		override protected function initializeHandlers():Handler 

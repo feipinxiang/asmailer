@@ -35,7 +35,6 @@
 				{
 					protocol.queue.enqueue( new CommandPacket( Command.EXTENDED_HELLO, this.host) );
 					protocol.processPacket();
-					//this.dispatchEvent( new SMTPEvent( SMTPEvent.READY, replyCode) );
 				}
 				else if ( this.successor != null )
 				{
