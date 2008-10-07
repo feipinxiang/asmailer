@@ -5,6 +5,8 @@
 	import com.docsultant.logging.Logger;
 	import flash.net.Socket;
 	import flash.events.IOErrorEvent;
+	import flash.events.Event;
+	import flash.events.SecurityErrorEvent;
 	import flash.utils.ByteArray;
 	import flash.events.ProgressEvent;
 	
@@ -20,8 +22,11 @@
 		public function Protocol(host:String = null , port:int = 0) 
 		{
 			super(host, port);
+			addEventListener(SecurityErrorEvent.SECURITY_ERROR, socketSecurityErrorHandler );
 			addEventListener(ProgressEvent.SOCKET_DATA, socketDataHandler);
 			addEventListener(IOErrorEvent.IO_ERROR, socketErrorHandler );
+			addEventListener(Event.CONNECT, socketConnectHandler );
+			addEventListener(Event.CLOSE, socketCloseHandler );
 			defaultHandler = initializeHandlers();
 		}
 		
@@ -33,8 +38,20 @@
 			defaultHandler.handleRequest(this, data)
 		}
 		
+		private function socketSecurityErrorHandler( event:SecurityErrorEvent ):void {
+			Logger.debug( event.text );
+		}
+		
 		private function socketErrorHandler( event:IOErrorEvent ):void {
 			Logger.debug( event.text );
+		}
+		
+		private function socketConnectHandler( event:Event ):void {
+			Logger.debug( "CONNECTED" );
+		}
+		
+		private function socketCloseHandler( event:Event ):void {
+			Logger.debug( "CLOSED" );
 		}
 		
 		protected function initializeHandlers():Handler
