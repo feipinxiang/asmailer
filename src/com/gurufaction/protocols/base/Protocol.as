@@ -4,6 +4,7 @@
 	import com.gurufaction.protocols.base.packets.PacketQueue;
 	import com.docsultant.logging.Logger;
 	import flash.net.Socket;
+	import flash.events.IOErrorEvent;
 	import flash.utils.ByteArray;
 	import flash.events.ProgressEvent;
 	
@@ -20,17 +21,22 @@
 		{
 			super(host, port);
 			addEventListener(ProgressEvent.SOCKET_DATA, socketDataHandler);
+			addEventListener(IOErrorEvent.IO_ERROR, socketErrorHandler );
 			defaultHandler = initializeHandlers();
 		}
 		
-		private function socketDataHandler ( event:ProgressEvent ):void 
+		private function socketDataHandler( event:ProgressEvent ):void 
 		{
 			var data:ByteArray = new ByteArray();
 			event.target.readBytes(data);
-			Logger.debug(data);
+			Logger.debug("<<" + data);
 			defaultHandler.handleRequest(queue, data)
 			
 			this.processPacket();
+		}
+		
+		private function socketErrorHandler( event:IOErrorEvent ):void {
+			Logger.debug( event.text );
 		}
 		
 		protected function initializeHandlers():Handler
@@ -48,14 +54,14 @@
 					{
 						while( !queue.isEmpty() )
 						{
-							Logger.info(queue.peek());
+							Logger.info(">>" + queue.peek());
 							this.writeBytes(queue.dequeue());
-							this.flush();
 						}
+						this.flush();
 					}
 					else
 					{
-						Logger.debug(queue.peek());
+						Logger.debug(">>" + queue.peek());
 						this.writeBytes(queue.dequeue());
 						this.flush();
 					}
