@@ -9,7 +9,6 @@
 	import com.gurufaction.protocols.mail.smtp.handlers.ErrorHandler;
 	import com.gurufaction.protocols.mail.smtp.handlers.OKHandler;
 	import com.gurufaction.protocols.mail.smtp.handlers.ServiceReadyHandler;
-	import com.dynamicflash.util.Base64;
 	import flash.utils.ByteArray;
 	
 	/**

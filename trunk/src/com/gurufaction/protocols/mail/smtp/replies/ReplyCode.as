@@ -32,9 +32,10 @@
 		
 		public static function parse( reply:String ):ReplyCode
 		{
-		
-			var code:int= parseInt(reply.substr(0, 3));
-			var message:String = reply.substr(4);
+			var keys:Array = reply.split(" ",2);
+			var code:int= parseInt(keys[0]);
+			var message:String = keys[1];
+			
 			return new ReplyCode(code, message);
 		}
 		

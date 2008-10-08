@@ -3,6 +3,7 @@
 	import com.gurufaction.protocols.mail.smtp.events.SMTPEvent;
 	import flash.utils.ByteArray;
 	import mx.utils.Base64Encoder;
+	import mx.utils.Base64Decoder;
 	import com.gurufaction.protocols.base.packets.CommandPacket;
 	import com.gurufaction.protocols.mail.smtp.commands.Command;
 	import com.gurufaction.protocols.mail.smtp.replies.ReplyCode;
@@ -36,11 +37,19 @@
 				
 				if ( replyCode.code == 334 )
 				{
-					Logger.debug(replyCode.message);
-					if ( Base64.decode(replyCode.message) == "Username:") {
-						protocol.queue.enqueue( new CommandPacket( Base64.encode("michael_ramirez44") ) );
-					}else if ( Base64.decode(replyCode.message) == "Password:") {
-						protocol.queue.enqueue( new CommandPacket( Base64.encode("mr5871") ) );
+					var decoder:Base64Decoder = new Base64Decoder();
+					var encoder:Base64Encoder = new Base64Encoder();
+					
+					decoder.decode(replyCode.message);
+					Logger.debug(decoder.toByteArray().toString());
+					if ( decoder.toByteArray().toString() == "Username:") {
+						encoder.reset();
+						encoder.encode(username);
+						protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );
+					}else if ( decoder.toByteArray().toString() == "Password:") {
+						encoder.reset();
+						encoder.encode(password);
+						protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );
 					}
 					protocol.processPacket();
 				}
