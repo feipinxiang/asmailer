@@ -1,10 +1,10 @@
 ﻿package com.gurufaction.protocols.mail.smtp.replies 
 {
-	
 	/**
 	* ...
 	* @author Default
 	*/
+	
 	public class ReplyCode 
 	{
 		private var _code:int;
@@ -32,8 +32,9 @@
 		
 		public static function parse( reply:String ):ReplyCode
 		{
+		
 			var code:int= parseInt(reply.substr(0, 3));
-			var message:String = reply.substr(3);
+			var message:String = reply.substr(4);
 			return new ReplyCode(code, message);
 		}
 		

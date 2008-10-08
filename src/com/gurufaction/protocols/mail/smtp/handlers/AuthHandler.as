@@ -2,7 +2,7 @@
 {
 	import com.gurufaction.protocols.mail.smtp.events.SMTPEvent;
 	import flash.utils.ByteArray;
-	import com.dynamicflash.util.Base64;
+	import mx.utils.Base64Encoder;
 	import com.gurufaction.protocols.base.packets.CommandPacket;
 	import com.gurufaction.protocols.mail.smtp.commands.Command;
 	import com.gurufaction.protocols.mail.smtp.replies.ReplyCode;
@@ -34,8 +34,9 @@
 				
 				var replyCode:ReplyCode = ReplyCode.parse( line );
 				
-				if ( replyCode.code == 343 )
+				if ( replyCode.code == 334 )
 				{
+					Logger.debug(replyCode.message);
 					if ( Base64.decode(replyCode.message) == "Username:") {
 						protocol.queue.enqueue( new CommandPacket( Base64.encode("michael_ramirez44") ) );
 					}else if ( Base64.decode(replyCode.message) == "Password:") {
