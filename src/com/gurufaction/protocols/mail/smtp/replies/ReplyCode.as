@@ -4,6 +4,7 @@
 	* ...
 	* @author Default
 	*/
+	import com.docsultant.logging.Logger;
 	
 	public class ReplyCode 
 	{
@@ -32,9 +33,9 @@
 		
 		public static function parse( reply:String ):ReplyCode
 		{
-			var keys:Array = reply.split(" ",2);
-			var code:int= parseInt(keys[0]);
-			var message:String = keys[1];
+			
+			var code:int= parseInt(reply.substr(0,3));
+			var message:String = reply.substr(4);
 			
 			return new ReplyCode(code, message);
 		}
