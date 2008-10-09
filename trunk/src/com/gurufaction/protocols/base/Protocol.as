@@ -47,7 +47,7 @@
 		}
 		
 		private function socketConnectHandler( event:Event ):void {
-			Logger.debug( "CONNECTED" );
+			Logger.debug( "CONNECTED");
 		}
 		
 		private function socketCloseHandler( event:Event ):void {
