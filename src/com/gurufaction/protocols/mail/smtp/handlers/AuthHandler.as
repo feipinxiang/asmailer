@@ -41,12 +41,13 @@
 					var encoder:Base64Encoder = new Base64Encoder();
 					
 					decoder.decode(replyCode.message);
-					Logger.debug(decoder.toByteArray().toString());
-					if ( decoder.toByteArray().toString() == "Username:") {
+					var prompt:String = decoder.toByteArray().toString()
+					
+					if ( prompt == "Username:") {
 						encoder.reset();
 						encoder.encode(username);
 						protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );
-					}else if ( decoder.toByteArray().toString() == "Password:") {
+					}else if ( prompt == "Password:") {
 						encoder.reset();
 						encoder.encode(password);
 						protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );

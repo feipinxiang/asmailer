@@ -31,7 +31,7 @@
 			{
 				
 				var replyCode:ReplyCode = ReplyCode.parse( line );
-				
+
 				if ( replyCode.code == 250 )
 				{
 					if ( replyCode.message.indexOf("queued") > 0 )
@@ -39,17 +39,19 @@
 						this.dispatchEvent( new SMTPEvent( SMTPEvent.MAIL_SENT, replyCode) );
 					}
 					
-					if ( replyCode.message.indexOf("AUTH") > 0 ) {
+					if ( replyCode.message.indexOf("AUTH") != -1 ) {
+						
 						requiresAuth = true;
 						protocol.queue.enqueue( new CommandPacket( Command.AUTHENTICATION, "LOGIN" ) );
 					}
 					
 					if ( replyCode.message.indexOf("OK") > 0 ) {
-						protocol.processPacket();
+						
 						if ( requiresAuth == false ) {
 							this.dispatchEvent( new SMTPEvent( SMTPEvent.READY, replyCode) );
 						}
 					}
+					protocol.processPacket();
 				}
 				else if ( this.successor != null )
 				{
