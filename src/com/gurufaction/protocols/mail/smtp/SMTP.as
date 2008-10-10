@@ -34,8 +34,12 @@
 			this.username = username;
 			this.password = password;
 			readyHandler.host = host;
-			authHandler.username = username;
-			authHandler.password = password;
+			if ( username != null && password != null ) {
+				readyHandler.requiresAuth = true;
+				authHandler.username = username;
+				authHandler.password = password;
+			}
+			
 			this.connect(host, port);
 		}
 		
@@ -54,7 +58,7 @@
 			this.queue.enqueue( msg );
 			this.queue.enqueue( new CommandPacket( Command.END_DATA ) );
 			this.queue.enqueue( new CommandPacket( Command.QUIT ) );
-			this.processPacket(true);
+			//this.processPacket();
 			
 		}
 		
@@ -70,16 +74,7 @@
 			okHandler.successor = errorHandler;
 			errorHandler.successor = authHandler;
 			
-			readyHandler.addEventListener( SMTPEvent.READY, eventHandler );
-			errorHandler.addEventListener( SMTPEvent.MAIL_ERROR, eventHandler );
-			okHandler.addEventListener( SMTPEvent.MAIL_SENT, eventHandler );
-			
 			return readyHandler;
-		}
-		
-		public function eventHandler( event:SMTPEvent ):void
-		{
-			dispatchEvent( new SMTPEvent(event.type, event.replyCode) );
 		}
 		
 	}

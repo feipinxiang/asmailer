@@ -52,7 +52,6 @@
 						encoder.encode(password);
 						protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );
 					}
-					protocol.processPacket();
 				}
 				else if ( this.successor != null )
 				{
