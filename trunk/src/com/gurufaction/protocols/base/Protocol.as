@@ -36,6 +36,7 @@
 			event.target.readBytes(data);
 			Logger.debug("<<" + data);
 			defaultHandler.handleRequest(this, data)
+			processPacket();
 		}
 		
 		private function socketSecurityErrorHandler( event:SecurityErrorEvent ):void {

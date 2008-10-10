@@ -2,6 +2,8 @@
 {
 	import com.gurufaction.protocols.mail.smtp.events.SMTPEvent;
 	import flash.utils.ByteArray;
+	import com.gurufaction.protocols.base.packets.CommandPacket;
+	import com.gurufaction.protocols.mail.smtp.commands.Command;
 	import com.gurufaction.protocols.mail.smtp.replies.ReplyCode;
 	import com.gurufaction.protocols.base.handlers.Handler;
 	import com.gurufaction.protocols.base.Protocol;
@@ -31,8 +33,9 @@
 				
 				if ( replyCode.code >= 500 )
 				{
-					this.dispatchEvent( new SMTPEvent( SMTPEvent.MAIL_ERROR, replyCode) );
-					protocol.queue.clear()
+					protocol.dispatchEvent( new SMTPEvent( SMTPEvent.MAIL_ERROR, replyCode) );
+					protocol.queue.clear();
+					protocol.queue.enqueue( new CommandPacket( Command.QUIT ) );
 				}
 				else if ( this.successor != null )
 				{

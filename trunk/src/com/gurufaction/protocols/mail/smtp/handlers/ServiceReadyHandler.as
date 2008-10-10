@@ -16,6 +16,7 @@
 	public class ServiceReadyHandler extends Handler
 	{
 		public var host:String = "";
+		public var requiresAuth:Boolean = false;
 		
 		public function ServiceReadyHandler() 
 		{
@@ -34,7 +35,11 @@
 				if ( replyCode.code == 220 )
 				{
 					protocol.queue.enqueue( new CommandPacket( Command.EXTENDED_HELLO, this.host) );
-					protocol.processPacket();
+					if ( requiresAuth) {
+						protocol.queue.enqueue( new CommandPacket( Command.AUTHENTICATION, "LOGIN" ) );
+					}else {
+						protocol.dispatchEvent( new SMTPEvent( SMTPEvent.READY, replyCode) );
+					}
 				}
 				else if ( this.successor != null )
 				{
