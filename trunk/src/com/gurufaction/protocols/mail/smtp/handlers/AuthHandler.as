@@ -17,8 +17,13 @@
 	*/
 	public class AuthHandler extends Handler
 	{
+		public static const LOGIN:String = "LOGIN";
+		public static const PLAIN:String = "PLAIN";
+		
 		public var username:String = null;
 		public var password:String = null;
+		public var authType:String = PLAIN;
+		
 		
 		public function AuthHandler() 
 		{
@@ -39,19 +44,37 @@
 				{
 					var decoder:Base64Decoder = new Base64Decoder();
 					var encoder:Base64Encoder = new Base64Encoder();
+					var login:ByteArray = new ByteArray();
 					
-					decoder.decode(replyCode.message);
-					var prompt:String = decoder.toByteArray().toString()
-					
-					if ( prompt == "Username:") {
-						encoder.reset();
-						encoder.encode(username);
-						protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );
-					}else if ( prompt == "Password:") {
-						encoder.reset();
-						encoder.encode(password);
-						protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );
+					switch( authType )
+					{
+						case LOGIN:
+							decoder.decode(replyCode.message);
+							var prompt:String = decoder.toByteArray().toString()
+							
+							if ( prompt == "Username:") {
+								encoder.reset();
+								encoder.encodeUTFBytes(username);
+								login.writeUTFBytes( encoder.toString() + "\r\n");
+								protocol.queue.enqueue( login );
+							}else if ( prompt == "Password:") {
+								encoder.reset();
+								encoder.encodeUTFBytes(password);
+								login.writeUTFBytes( encoder.toString() + "\r\n");
+								protocol.queue.enqueue( login );
+							}
+							break;
+						case PLAIN:
+							login.writeByte(0);
+							login.writeUTFBytes(username);
+							login.writeByte(0)
+							login.writeUTFBytes(password);
+							encoder.reset();
+							encoder.encodeBytes(login);
+							protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );
+							break;
 					}
+					
 				}
 				else if ( this.successor != null )
 				{

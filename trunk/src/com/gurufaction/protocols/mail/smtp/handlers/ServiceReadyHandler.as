@@ -17,6 +17,7 @@
 	{
 		public var host:String = "";
 		public var requiresAuth:Boolean = false;
+		public var authType:String = "";
 		
 		public function ServiceReadyHandler() 
 		{
@@ -34,9 +35,13 @@
 			
 				if ( replyCode.code == 220 )
 				{
-					protocol.queue.enqueue( new CommandPacket( Command.EXTENDED_HELLO, this.host) );
+					if( replyCode.message.indexOf("ESMTP") != -1 ){
+						protocol.queue.enqueue( new CommandPacket( Command.EXTENDED_HELLO, this.host) );
+					}else {
+						protocol.queue.enqueue( new CommandPacket( Command.HELLO, this.host) );
+					}
 					if ( requiresAuth) {
-						protocol.queue.enqueue( new CommandPacket( Command.AUTHENTICATION, "LOGIN" ) );
+						protocol.queue.enqueue( new CommandPacket( Command.AUTHENTICATION, authType ) );
 					}else {
 						protocol.dispatchEvent( new SMTPEvent( SMTPEvent.READY, replyCode) );
 					}

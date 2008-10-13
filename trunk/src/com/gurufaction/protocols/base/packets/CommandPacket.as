@@ -1,7 +1,7 @@
 ﻿package com.gurufaction.protocols.base.packets 
 {
 	import flash.utils.ByteArray;
-	
+	import mx.utils.StringUtil;
 	/**
 	* ...
 	* @author Default
@@ -12,7 +12,7 @@
 		
 		public function CommandPacket(cmd:String, arg:String = "" ) 
 		{
-			this.writeUTFBytes (cmd + " " + arg + CommandPacket.CRLF);
+			this.writeUTFBytes (StringUtil.trim(cmd + " " + arg) + CommandPacket.CRLF);
 		}
 		
 	}
