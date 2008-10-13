@@ -38,7 +38,7 @@
 				handler.username = username;
 				handler.password = password;
 			}
-			Security.loadPolicyFile("xmlsocket://" + host + ":843"); 
+			
 			this.connect(host, port);
 		}
 		
@@ -57,8 +57,6 @@
 			this.queue.enqueue( msg );
 			this.queue.enqueue( new CommandPacket( Command.END_DATA ) );
 			this.queue.enqueue( new CommandPacket( Command.QUIT ) );
-			//this.processPacket();
-			
 		}
 		
 		public function help(cmd:String):void
