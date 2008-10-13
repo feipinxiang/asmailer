@@ -1,14 +1,12 @@
 ﻿package com.gurufaction.protocols.mail.smtp 
 {
+	import flash.system.Security;
 	import com.gurufaction.protocols.base.handlers.Handler;
 	import com.gurufaction.protocols.base.packets.CommandPacket;
 	import com.gurufaction.protocols.mail.smtp.commands.Command;
 	import com.gurufaction.protocols.base.Protocol;
 	import com.gurufaction.protocols.mail.smtp.events.SMTPEvent;
-	import com.gurufaction.protocols.mail.smtp.handlers.AuthHandler;
 	import com.gurufaction.protocols.mail.smtp.handlers.ErrorHandler;
-	import com.gurufaction.protocols.mail.smtp.handlers.OKHandler;
-	import com.gurufaction.protocols.mail.smtp.handlers.ServiceReadyHandler;
 	import com.gurufaction.protocols.mail.smtp.handlers.SMTPHandler;
 	import flash.utils.ByteArray;
 	
@@ -40,7 +38,7 @@
 				handler.username = username;
 				handler.password = password;
 			}
-			
+			Security.loadPolicyFile("xmlsocket://" + host + ":843"); 
 			this.connect(host, port);
 		}
 		
