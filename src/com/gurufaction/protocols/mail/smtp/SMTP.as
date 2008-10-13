@@ -9,6 +9,7 @@
 	import com.gurufaction.protocols.mail.smtp.handlers.ErrorHandler;
 	import com.gurufaction.protocols.mail.smtp.handlers.OKHandler;
 	import com.gurufaction.protocols.mail.smtp.handlers.ServiceReadyHandler;
+	import com.gurufaction.protocols.mail.smtp.handlers.SMTPHandler;
 	import flash.utils.ByteArray;
 	
 	/**
@@ -21,23 +22,23 @@
 		public var port:int = 25;
 		public var username:String = null;
 		public var password:String = null;
-		private var readyHandler:ServiceReadyHandler = new ServiceReadyHandler();
-		private var okHandler:OKHandler = new OKHandler();
 		private var errorHandler:ErrorHandler = new ErrorHandler();
-		private var authHandler:AuthHandler = new AuthHandler();
+		private var handler:SMTPHandler = new SMTPHandler();
 		
-		public function SMTP(host:String = null, username:String = null, password:String = null, port:int = 25) 
+		
+		public function SMTP(host:String = null, username:String = null, password:String = null,auth:String = "LOGIN", port:int = 25) 
 		{
 			super(null, 0)
 			this.host = host;
 			this.port = port;
 			this.username = username;
 			this.password = password;
-			readyHandler.host = host;
+			handler.host = host;
 			if ( username != null && password != null ) {
-				readyHandler.requiresAuth = true;
-				authHandler.username = username;
-				authHandler.password = password;
+				handler.requiresAuth = true;
+				handler.authType = auth;
+				handler.username = username;
+				handler.password = password;
 			}
 			
 			this.connect(host, port);
@@ -70,11 +71,8 @@
 		
 		override protected function initializeHandlers():Handler 
 		{
-			readyHandler.successor = okHandler;
-			okHandler.successor = errorHandler;
-			errorHandler.successor = authHandler;
-			
-			return readyHandler;
+			handler.successor = errorHandler;
+			return handler;
 		}
 		
 	}

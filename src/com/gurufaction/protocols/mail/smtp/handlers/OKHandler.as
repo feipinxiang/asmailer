@@ -37,6 +37,9 @@
 						protocol.dispatchEvent( new SMTPEvent( SMTPEvent.MAIL_SENT, replyCode) );
 					}
 				}
+				else if ( replyCode.code == 354 ) {
+					protocol.processPacket();
+				}
 				else if ( this.successor != null )
 				{
 					var unhandledData:ByteArray = new ByteArray();
