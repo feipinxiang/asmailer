@@ -25,6 +25,7 @@
 		public var authType:String = AUTH_PLAIN;
 		public var requiresAuth:Boolean = false;
 		
+		private var digest:Object = new Object();
 		
 		public function SMTPHandler() 
 		{
@@ -64,7 +65,7 @@
 					case 334:
 						var decoder:Base64Decoder = new Base64Decoder();
 						var encoder:Base64Encoder = new Base64Encoder();
-						
+						decoder.reset();
 						switch( authType )
 						{
 							case "LOGIN":
@@ -74,12 +75,10 @@
 								if ( prompt == "Username:") {
 									encoder.reset();
 									encoder.encodeUTFBytes(username);
-									//login.writeUTFBytes( encoder.toString() + "\r\n");
 									protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );
 								}else if ( prompt == "Password:") {
 									encoder.reset();
 									encoder.encodeUTFBytes(password);
-									//login.writeUTFBytes( encoder.toString() + "\r\n");
 									protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );
 								}
 								break;
@@ -92,6 +91,19 @@
 								encoder.reset();
 								encoder.encodeBytes(login);
 								protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );
+								break;
+							case "DIGEST-MD5":
+								decoder.reset()
+								decoder.decode(replyCode.message);
+								var digest_challenge:String = decoder.toByteArray().toString();
+								Logger.debug( digest );
+								var directives:Array = digest_challenge.split(",");
+								for each( var directive:String in directives ) {
+									var attribute:String = directive.split("=");
+									var key:String = attribute[1];
+									var value:String attribute[2];
+									digest[key] = value;
+								}
 								break;
 						}
 						break;
