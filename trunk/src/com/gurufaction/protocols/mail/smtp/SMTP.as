@@ -16,6 +16,10 @@
 	*/
 	public class SMTP extends Protocol
 	{
+		public static const AUTH_LOGIN:String = "LOGIN";
+		public static const AUTH_PLAIN:String = "PLAIN";
+		public static const AUTH_DIGEST_MD5:String = "DIGEST-MD5";
+		
 		public var host:String = null;
 		public var port:int = 25;
 		public var username:String = null;
@@ -24,7 +28,7 @@
 		private var handler:SMTPHandler = new SMTPHandler();
 		
 		
-		public function SMTP(host:String = null, username:String = null, password:String = null,auth:String = "LOGIN", port:int = 25) 
+		public function SMTP(host:String = null, username:String = null, password:String = null,auth:String = null, port:int = 25) 
 		{
 			super(null, 0)
 			this.host = host;
@@ -32,9 +36,14 @@
 			this.username = username;
 			this.password = password;
 			handler.host = host;
-			if ( username != null && password != null ) {
+			
+			if ( username != null && password != null) {
 				handler.requiresAuth = true;
-				handler.authType = auth;
+				if ( auth == null ) {
+					handler.authType = AUTH_LOGIN;
+				}else{
+					handler.authType = auth;
+				}
 				handler.username = username;
 				handler.password = password;
 			}
