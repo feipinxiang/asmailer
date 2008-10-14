@@ -4,6 +4,7 @@
 	import flash.utils.ByteArray;
 	import mx.utils.Base64Encoder;
 	import mx.utils.Base64Decoder;
+	import com.adobe.crypto.MD5;
 	import com.gurufaction.protocols.base.packets.CommandPacket;
 	import com.gurufaction.protocols.mail.smtp.commands.Command;
 	import com.gurufaction.protocols.mail.smtp.replies.ReplyCode;
@@ -27,9 +28,16 @@
 		
 		private var digest:Object = new Object();
 		
+		
 		public function SMTPHandler() 
 		{
-			
+			digest["nonce"] = "";
+			digest["cnonce"] = "";
+			digest["digest-uri"] = "";
+			digest["realm"] = "";
+			digest["qop"] = "auth";
+			digest["nc"] = "00000001";
+			digest["charset"] = "";
 		}
 		
 		override public function handleRequest(protocol:Protocol, data:ByteArray):void 
@@ -96,14 +104,22 @@
 								decoder.reset()
 								decoder.decode(replyCode.message);
 								var digest_challenge:String = decoder.toByteArray().toString();
-								Logger.debug( digest );
+								Logger.debug( digest_challenge );
 								var directives:Array = digest_challenge.split(",");
 								for each( var directive:String in directives ) {
-									var attribute:String = directive.split("=");
-									var key:String = attribute[1];
-									var value:String attribute[2];
+									var attribute:Array = directive.split("=");
+									var key:String = attribute[0];
+									var value:String = String(attribute[1]);
 									digest[key] = value;
 								}
+								var A1:String = MD5.hash(username + ":" + digest["realm"] + ":" + password) + digest["nonce"] + digest["cnonce"];
+								var A2:String = "AUTHENTICATE:" + digest["digest-uri"];
+								digest["response"] = MD5.hash(MD5.hash(A1) + digest["nonce"] + ":" + digest["nc"] + ":" + digest["cnonce"] + ":" + digest["qop"] + MD5.hash(A2));
+								var digest_response:String = "charset=" + digest["charset"] + ",username=\"" + username + "\",realm=\"" + digest["realm"]  + "\",nonce=\"" + digest["nonce"] + "\",nc=" + digest["nc"] + ",cnonce=\"" + digest["cnonce"] + "\",digest-uri=\"" + digest["digest-uri"] + "\",response=" + digest["response"] + ",qop=" + digest["qop"];
+								Logger.debug(digest_response);
+								encoder.reset();
+								encoder.encode(digest_response);
+								protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );
 								break;
 						}
 						break;
