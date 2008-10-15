@@ -27,6 +27,8 @@
 		public var requiresAuth:Boolean = false;
 		
 		private var digest:Object = new Object();
+		private var digest_challenge:String;
+		private var digest_response:String;
 		
 		
 		public function SMTPHandler() 
@@ -103,7 +105,7 @@
 							case "DIGEST-MD5":
 								decoder.reset()
 								decoder.decode(replyCode.message);
-								var digest_challenge:String = decoder.toByteArray().toString();
+								digest_challenge = decoder.toByteArray().toString();
 								Logger.debug( digest_challenge );
 								var directives:Array = digest_challenge.split(",");
 								for each( var directive:String in directives ) {
@@ -115,8 +117,52 @@
 								var A1:String = MD5.hash(username + ":" + digest["realm"] + ":" + password) + digest["nonce"] + digest["cnonce"];
 								var A2:String = "AUTHENTICATE:" + digest["digest-uri"];
 								digest["response"] = MD5.hash(MD5.hash(A1) + digest["nonce"] + ":" + digest["nc"] + ":" + digest["cnonce"] + ":" + digest["qop"] + MD5.hash(A2));
-								var digest_response:String = "charset=" + digest["charset"] + ",username=\"" + username + "\",realm=\"" + digest["realm"]  + "\",nonce=\"" + digest["nonce"] + "\",nc=" + digest["nc"] + ",cnonce=\"" + digest["cnonce"] + "\",digest-uri=\"" + digest["digest-uri"] + "\",response=" + digest["response"] + ",qop=" + digest["qop"];
+								digest_response = "charset=" + digest["charset"] + ",username=\"" + username + "\",realm=\"" + digest["realm"]  + "\",nonce=\"" + digest["nonce"] + "\",nc=" + digest["nc"] + ",cnonce=\"" + digest["cnonce"] + "\",digest-uri=\"" + digest["digest-uri"] + "\",response=" + digest["response"] + ",qop=" + digest["qop"];
 								Logger.debug(digest_response);
+								encoder.reset();
+								encoder.encode(digest_response);
+								protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );
+								break;
+							case "CRAM-MD5":
+								/*
+								 * the CRAM_MD5 transform looks like:
+								 *
+								 * MD5(K XOR opad, MD5(K XOR ipad, text))
+								 *
+								 * where K is an n byte key
+								 * ipad is the byte 0x36 repeated 64 times
+
+								 * opad is the byte 0x5c repeated 64 times
+								 * and text is the data being protected
+								 */
+								decoder.reset()
+								decoder.decode(replyCode.message);
+								
+								var secret:String = password;
+								var text:String = decoder.toByteArray().toString();
+								var k_secret:ByteArray = new ByteArray();
+								var ipad:ByteArray = new ByteArray();
+								var opad:ByteArray = new ByteArray();
+								
+								if ( secret.length > 64 ) {
+									secret = MD5.hash(secret);
+								}
+								
+								k_secret.writeUTFBytes(secret);
+								k_secret.position = 0;
+								
+								for ( var x:int = 0; x < 64; x++ ) {
+									
+									if ( x < k_secret.bytesAvailable) {
+										ipad.writeByte(0x36 ^ k_secret.readByte());
+										opad.writeByte(0x5C ^ k_secret.readByte());
+									}else {
+										ipad.writeByte(0x36 ^ 0);
+										opad.writeByte(0x5C ^ 0);
+									}
+								}
+								
+								digest_response = username + " " + MD5.hash( opad.toString() + MD5.hash( ipad.toString() + text ) );
 								encoder.reset();
 								encoder.encode(digest_response);
 								protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );
