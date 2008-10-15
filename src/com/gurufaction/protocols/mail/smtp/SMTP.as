@@ -19,6 +19,7 @@
 		public static const AUTH_LOGIN:String = "LOGIN";
 		public static const AUTH_PLAIN:String = "PLAIN";
 		public static const AUTH_DIGEST_MD5:String = "DIGEST-MD5";
+		public static const AUTH_CRAM_MD5:String = "CRAM-MD5";
 		
 		public var host:String = null;
 		public var port:int = 25;
