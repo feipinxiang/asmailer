@@ -4,6 +4,7 @@
 	import flash.utils.ByteArray;
 	import mx.utils.Base64Encoder;
 	import mx.utils.Base64Decoder;
+	import com.adobe.crypto.MD5Stream;
 	import com.adobe.crypto.MD5;
 	import com.gurufaction.protocols.base.packets.CommandPacket;
 	import com.gurufaction.protocols.mail.smtp.commands.Command;
@@ -137,9 +138,10 @@
 								 */
 								decoder.reset()
 								decoder.decode(replyCode.message);
-								
+								var challenge:String = decoder.toByteArray().toString();
 								var secret:String = password;
-								var text:String = decoder.toByteArray().toString();
+								
+								var text:ByteArray = new ByteArray();
 								var k_secret:ByteArray = new ByteArray();
 								var ipad:ByteArray = new ByteArray();
 								var opad:ByteArray = new ByteArray();
@@ -149,20 +151,24 @@
 								}
 								
 								k_secret.writeUTFBytes(secret);
+								
+								for ( var pos:int = k_secret.length; pos < 64; pos++) {
+									k_secret.writeByte(0);
+								}
 								k_secret.position = 0;
 								
 								for ( var x:int = 0; x < 64; x++ ) {
-									
-									if ( x < k_secret.bytesAvailable) {
-										ipad.writeByte(0x36 ^ k_secret.readByte());
-										opad.writeByte(0x5C ^ k_secret.readByte());
-									}else {
-										ipad.writeByte(0x36 ^ 0);
-										opad.writeByte(0x5C ^ 0);
-									}
+									var byte:int = k_secret.readByte();
+									ipad.writeByte(0x36 ^ byte);
+									opad.writeByte(0x5c ^ byte);
 								}
 								
-								digest_response = username + " " + MD5.hash( opad.toString() + MD5.hash( ipad.toString() + text ) );
+								text.writeUTFBytes(challenge);
+								digest_response = username + " " + MD5.hash( opad.toString() + MD5.hash( ipad.toString() + text.toString() ) ) ;
+								Logger.debug("Username: " + username);
+								Logger.debug("Password: " + password);
+								Logger.debug("Challenge: " + challenge)
+								Logger.debug(digest_response);
 								encoder.reset();
 								encoder.encode(digest_response);
 								protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );
