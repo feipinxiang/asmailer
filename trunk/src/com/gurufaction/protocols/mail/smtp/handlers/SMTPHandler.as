@@ -2,6 +2,7 @@
 {
 	import com.gurufaction.protocols.mail.smtp.events.SMTPEvent;
 	import flash.utils.ByteArray;
+	import flash.utils.Endian;
 	import mx.utils.Base64Encoder;
 	import mx.utils.Base64Decoder;
 	import com.adobe.crypto.MD5Stream;
@@ -162,9 +163,25 @@
 									ipad.writeByte(0x36 ^ byte);
 									opad.writeByte(0x5c ^ byte);
 								}
-								
+								/****************************************
+								oPad: 92edc5508d511b54a8931dd1fdf4a26b
+								iPad: 853978bb7c31bc63206d34925dee7afd
+								iPad + Text: 98ffa9d45893baf5c38790118405e6d6
+								f122bdebc2d4e57dcad2a09d3a5664c0
+								*****************************/
 								text.writeUTFBytes(challenge);
-								digest_response = username + " " + MD5.hash( opad.toString() + MD5.hash( ipad.toString() + text.toString() ) ) ;
+								Logger.debug(MD5.hash( opad.toString() ) );
+								Logger.debug(MD5.hash( ipad.toString() ) );
+								ipad.writeBytes(text);
+								Logger.debug(MD5.hash( ipad.toString() ) );
+								var tmp:ByteArray = MD5.hashBinary( ipad );
+								
+								while ( tmp.bytesAvailable != 0 ) {
+									opad.writeUTFBytes(String.fromCharCode(tmp.readUnsignedByte()));
+								}
+								Logger.debug( MD5.hash( opad.toString() ) );
+								
+								digest_response = username + " " + MD5.hash( opad.toString() );
 								Logger.debug("Username: " + username);
 								Logger.debug("Password: " + password);
 								Logger.debug("Challenge: " + challenge)
