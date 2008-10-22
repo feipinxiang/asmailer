@@ -174,9 +174,13 @@
 								Logger.debug(MD5.hash( ipad.toString() ) );
 								ipad.writeBytes(text);
 								Logger.debug(MD5.hash( ipad.toString() ) );
-								var tmp:ByteArray = MD5.hashBinary( ipad );
-								
+								var tmp:ByteArray = new ByteArray();
+								tmp.writeBytes(ipad);
+								tmp.endian = Endian.LITTLE_ENDIAN;
+								MD5.hashBinary( tmp );
+								tmp.position = 0;
 								while ( tmp.bytesAvailable != 0 ) {
+									//Logger.debug(tmp.readUnsignedByte().toString(16));
 									opad.writeUTFBytes(String.fromCharCode(tmp.readUnsignedByte()));
 								}
 								Logger.debug( MD5.hash( opad.toString() ) );
