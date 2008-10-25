@@ -5,7 +5,7 @@
 	import flash.utils.Endian;
 	import mx.utils.Base64Encoder;
 	import mx.utils.Base64Decoder;
-	import com.adobe.crypto.MD5Stream;
+	import com.adobe.crypto.HMAC;
 	import com.adobe.crypto.MD5;
 	import com.gurufaction.protocols.base.packets.CommandPacket;
 	import com.gurufaction.protocols.mail.smtp.commands.Command;
@@ -74,6 +74,9 @@
 							protocol.dispatchEvent( new SMTPEvent( SMTPEvent.MAIL_SENT, replyCode) );
 						}
 						break;
+					case 235:
+						protocol.dispatchEvent( new SMTPEvent( SMTPEvent.READY, replyCode) );
+						break;
 					case 334:
 						var decoder:Base64Decoder = new Base64Decoder();
 						var encoder:Base64Encoder = new Base64Encoder();
@@ -126,70 +129,13 @@
 								protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );
 								break;
 							case "CRAM-MD5":
-								/*
-								 * the CRAM_MD5 transform looks like:
-								 *
-								 * MD5(K XOR opad, MD5(K XOR ipad, text))
-								 *
-								 * where K is an n byte key
-								 * ipad is the byte 0x36 repeated 64 times
 
-								 * opad is the byte 0x5c repeated 64 times
-								 * and text is the data being protected
-								 */
 								decoder.reset()
 								decoder.decode(replyCode.message);
 								var challenge:String = decoder.toByteArray().toString();
-								var secret:String = password;
 								
-								var text:ByteArray = new ByteArray();
-								var k_secret:ByteArray = new ByteArray();
-								var ipad:ByteArray = new ByteArray();
-								var opad:ByteArray = new ByteArray();
+								digest_response = username + " " + HMAC.hash(password,challenge);
 								
-								if ( secret.length > 64 ) {
-									secret = MD5.hash(secret);
-								}
-								
-								k_secret.writeUTFBytes(secret);
-								
-								for ( var pos:int = k_secret.length; pos < 64; pos++) {
-									k_secret.writeByte(0);
-								}
-								k_secret.position = 0;
-								
-								for ( var x:int = 0; x < 64; x++ ) {
-									var byte:int = k_secret.readByte();
-									ipad.writeByte(0x36 ^ byte);
-									opad.writeByte(0x5c ^ byte);
-								}
-								/****************************************
-								oPad: 92edc5508d511b54a8931dd1fdf4a26b
-								iPad: 853978bb7c31bc63206d34925dee7afd
-								iPad + Text: 98ffa9d45893baf5c38790118405e6d6
-								f122bdebc2d4e57dcad2a09d3a5664c0
-								*****************************/
-								text.writeUTFBytes(challenge);
-								Logger.debug(MD5.hash( opad.toString() ) );
-								Logger.debug(MD5.hash( ipad.toString() ) );
-								ipad.writeBytes(text);
-								Logger.debug(MD5.hash( ipad.toString() ) );
-								var tmp:ByteArray = new ByteArray();
-								tmp.writeBytes(ipad);
-								tmp.endian = Endian.LITTLE_ENDIAN;
-								MD5.hashBinary( tmp );
-								tmp.position = 0;
-								while ( tmp.bytesAvailable != 0 ) {
-									//Logger.debug(tmp.readUnsignedByte().toString(16));
-									opad.writeUTFBytes(String.fromCharCode(tmp.readUnsignedByte()));
-								}
-								Logger.debug( MD5.hash( opad.toString() ) );
-								
-								digest_response = username + " " + MD5.hash( opad.toString() );
-								Logger.debug("Username: " + username);
-								Logger.debug("Password: " + password);
-								Logger.debug("Challenge: " + challenge)
-								Logger.debug(digest_response);
 								encoder.reset();
 								encoder.encode(digest_response);
 								protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );
