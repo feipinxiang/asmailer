@@ -20,8 +20,6 @@
 	*/
 	public class SMTPHandler extends Handler
 	{
-		public static const AUTH_LOGIN:String = "LOGIN";
-		public static const AUTH_PLAIN:String = "PLAIN";
 		public var host:String = null;
 		public var username:String = null;
 		public var password:String = null;
@@ -75,6 +73,7 @@
 						}
 						break;
 					case 235:
+						protocol.dispatchEvent( new SMTPEvent( SMTPEvent.MAIL_AUTH, replyCode) );
 						protocol.dispatchEvent( new SMTPEvent( SMTPEvent.READY, replyCode) );
 						break;
 					case 334:
