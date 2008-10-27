@@ -10,9 +10,12 @@
 	*/
 	public class SMTPEvent extends Event
 	{
-		public static const READY:String = "Ready";
+		public static const MAIL_READY:String = "Ready";
 		public static const MAIL_ERROR:String = "Error";
 		public static const MAIL_SENT:String = "Sent";
+		public static const MAIL_AUTH:String = "Auth";
+		public static const MAIL_CONNECTED:String = "Connected";
+		public static const MAIL_DISCONNECTED:String = "Disconnected";
 		
 		public var replyCode:ReplyCode;
 		

@@ -58,12 +58,13 @@
 			this.queue.enqueue( new CommandPacket( Command.RECIPIENT, "TO:<" + to + ">") );
 			this.queue.enqueue( new CommandPacket( Command.DATA ) );
 			var msg:ByteArray = new ByteArray();
-			msg.writeUTFBytes( "From:" + from + CommandPacket.CRLF )
-			msg.writeUTFBytes( "To:" + to + CommandPacket.CRLF);
-			msg.writeUTFBytes( "Subject:" + subject + CommandPacket.CRLF);
-			msg.writeUTFBytes( "Mime-Version: 1.0" + CommandPacket.CRLF);
-			msg.writeUTFBytes( "Content-Type: text/plain; charset=UTF-8; format=flowed;" + CommandPacket.CRLF);
-			msg.writeUTFBytes( message);
+			msg.writeUTFBytes ("From: "+from+"\r\n");
+			msg.writeUTFBytes ("To: "+to+"\r\n");
+			msg.writeUTFBytes ("Date: "+new Date().toString()+"\r\n");
+			msg.writeUTFBytes ("Subject: "+subject+"\r\n");
+			msg.writeUTFBytes ("Mime-Version: 1.0\r\n");
+			msg.writeUTFBytes ("Content-Type: text/html; charset=UTF-8; format=flowed\r\n");
+			msg.writeUTFBytes (message+"\r\n");
 			this.queue.enqueue( msg );
 			var end:ByteArray = new ByteArray();
 			end.writeUTFBytes( Command.END_DATA );
