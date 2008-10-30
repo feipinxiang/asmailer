@@ -23,7 +23,7 @@
 		public var host:String = null;
 		public var username:String = null;
 		public var password:String = null;
-		public var authType:String = AUTH_PLAIN;
+		public var authType:String = "PLAIN";
 		public var requiresAuth:Boolean = false;
 		
 		private var digest:Object = new Object();
@@ -61,9 +61,9 @@
 							protocol.queue.enqueue( new CommandPacket( Command.HELLO, this.host) );
 						}
 						if ( requiresAuth) {
-							protocol.queue.enqueue( new CommandPacket( Command.AUTHENTICATION, authType ) );
+							protocol.queue.enqueue( new CommandPacket( authType ) );
 						}else {
-							protocol.dispatchEvent( new SMTPEvent( SMTPEvent.READY, replyCode) );
+							protocol.dispatchEvent( new SMTPEvent( SMTPEvent.MAIL_READY, replyCode) );
 						}
 						break;
 					case 250:
@@ -74,7 +74,7 @@
 						break;
 					case 235:
 						protocol.dispatchEvent( new SMTPEvent( SMTPEvent.MAIL_AUTH, replyCode) );
-						protocol.dispatchEvent( new SMTPEvent( SMTPEvent.READY, replyCode) );
+						protocol.dispatchEvent( new SMTPEvent( SMTPEvent.MAIL_READY, replyCode) );
 						break;
 					case 334:
 						var decoder:Base64Decoder = new Base64Decoder();
@@ -82,6 +82,8 @@
 						decoder.reset();
 						switch( authType )
 						{
+							case "STARTTLS":
+								break;
 							case "LOGIN":
 								decoder.decode(replyCode.message);
 								var prompt:String = decoder.toByteArray().toString()
@@ -132,9 +134,9 @@
 								decoder.reset()
 								decoder.decode(replyCode.message);
 								var challenge:String = decoder.toByteArray().toString();
-								
+								Logger.debug(challenge);
 								digest_response = username + " " + HMAC.hash(password,challenge);
-								
+								Logger.debug(digest_response);
 								encoder.reset();
 								encoder.encode(digest_response);
 								protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );

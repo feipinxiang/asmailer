@@ -16,10 +16,11 @@
 	*/
 	public class SMTP extends Protocol
 	{
-		public static const AUTH_LOGIN:String = "LOGIN";
-		public static const AUTH_PLAIN:String = "PLAIN";
-		public static const AUTH_DIGEST_MD5:String = "DIGEST-MD5";
-		public static const AUTH_CRAM_MD5:String = "CRAM-MD5";
+		public static const AUTH_LOGIN:String 		= "AUTH LOGIN";
+		public static const AUTH_PLAIN:String 		= "AUTH PLAIN";
+		public static const AUTH_DIGEST_MD5:String 	= "AUTH DIGEST-MD5";
+		public static const AUTH_CRAM_MD5:String 	= "AUTH CRAM-MD5";
+		public static const AUTH_STARTTLS:String 	= "STARTTLS";
 		
 		public var host:String = null;
 		public var port:int = 25;
@@ -64,7 +65,7 @@
 			msg.writeUTFBytes ("Subject: "+subject+"\r\n");
 			msg.writeUTFBytes ("Mime-Version: 1.0\r\n");
 			msg.writeUTFBytes ("Content-Type: text/html; charset=UTF-8; format=flowed\r\n");
-			msg.writeUTFBytes (message+"\r\n");
+			msg.writeUTFBytes ("\r\n"+message+"\r\n");
 			this.queue.enqueue( msg );
 			var end:ByteArray = new ByteArray();
 			end.writeUTFBytes( Command.END_DATA );
