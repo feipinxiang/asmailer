@@ -84,7 +84,7 @@
 						{
 							case "STARTTLS":
 								break;
-							case "LOGIN":
+							case "AUTH LOGIN":
 								decoder.decode(replyCode.message);
 								var prompt:String = decoder.toByteArray().toString()
 								
@@ -98,7 +98,7 @@
 									protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );
 								}
 								break;
-							case "PLAIN":
+							case "AUTH PLAIN":
 								var login:ByteArray = new ByteArray();
 								login.writeByte(0);
 								login.writeUTFBytes(username);
@@ -108,7 +108,7 @@
 								encoder.encodeBytes(login);
 								protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );
 								break;
-							case "DIGEST-MD5":
+							case "ATUH DIGEST-MD5":
 								decoder.reset()
 								decoder.decode(replyCode.message);
 								digest_challenge = decoder.toByteArray().toString();
@@ -129,7 +129,7 @@
 								encoder.encode(digest_response);
 								protocol.queue.enqueue( new CommandPacket( encoder.toString() ) );
 								break;
-							case "CRAM-MD5":
+							case "AUTH CRAM-MD5":
 
 								decoder.reset()
 								decoder.decode(replyCode.message);
