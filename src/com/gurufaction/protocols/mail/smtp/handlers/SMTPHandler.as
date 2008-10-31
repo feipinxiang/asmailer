@@ -79,6 +79,7 @@
 					case 334:
 						var decoder:Base64Decoder = new Base64Decoder();
 						var encoder:Base64Encoder = new Base64Encoder();
+						encoder.insertNewLines = false;
 						decoder.reset();
 						switch( authType )
 						{
