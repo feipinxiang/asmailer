@@ -1,0 +1,1 @@
+Actionscript 3 Mail API which supports SMTP, POP3, IMAP protocols
